@@ -36,7 +36,7 @@ const config = {
     from: env.SMTP_FROM || env.MAIL_FROM || 'StayDesk <no-reply@example.com>',
   },
   resetCodeSec: int(env.RESET_CODE_MINUTES, 30) * 60,
-  privacy: { owner: env.PRIVACY_OWNER || 'StayDesk', email: env.PRIVACY_EMAIL || 'support@example.com' },
+  privacy: { owner: env.PRIVACY_OWNER || 'StayDesk', email: env.PRIVACY_EMAIL || '' },
   rate: {
     enabled: env.RATE_LIMIT !== 'off' && nodeEnv !== 'test',
     readPerMin: int(env.RATE_READ_PER_MIN, 600),

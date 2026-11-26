@@ -19,7 +19,14 @@ const pickLang = (req) => {
 const UPDATED = '2026-11-26';
 const OWNER = config.privacy.owner;
 const EMAIL = config.privacy.email;
-const mailLink = `<a href="mailto:${esc(EMAIL)}">${esc(EMAIL)}</a>`;
+// Không đặt PRIVACY_EMAIL → không hiện email cá nhân; liên hệ qua kênh hỗ trợ trên trang Google Play + trang xóa tài khoản
+const mailLink = EMAIL ? `<a href="mailto:${esc(EMAIL)}">${esc(EMAIL)}</a>` : '';
+const contact = {
+  vi: EMAIL ? `Liên hệ: ${mailLink}.` : 'Liên hệ qua email hỗ trợ trên trang ứng dụng StayDesk ở Google Play.',
+  en: EMAIL ? `Contact: ${mailLink}.` : "Contact us through the support email on StayDesk's Google Play listing.",
+  viReq: EMAIL ? `gửi yêu cầu về ${mailLink}` : 'gửi yêu cầu qua email hỗ trợ trên trang ứng dụng ở Google Play',
+  enReq: EMAIL ? `write to ${mailLink}` : "write to the support email on the app's Google Play listing",
+};
 const base = () => config.publicBaseUrl || '';
 
 const STYLE = `:root{--bg:#f7f7f5;--fg:#1d1d1b;--muted:#5d5d58;--card:#fff;--line:#d9d9d4;--accent:#0f766e}
@@ -45,7 +52,7 @@ const privacy = {
     updated: `Cập nhật lần cuối: ${UPDATED.split('-').reverse().join('/')}`,
     other: '<a href="?lang=en">English</a>',
     sections: [
-      ['Chúng tôi là ai', [`StayDesk là ứng dụng quản lý nhà nghỉ, nhà khách dành cho chủ và quản lý cơ sở, do <strong>${esc(OWNER)}</strong> phát triển và chịu trách nhiệm về dữ liệu. Liên hệ: ${mailLink}.`]],
+      ['Chúng tôi là ai', [`StayDesk là ứng dụng quản lý nhà nghỉ, nhà khách dành cho chủ và quản lý cơ sở, do <strong>${esc(OWNER)}</strong> phát triển và chịu trách nhiệm về dữ liệu. ${contact.vi}`]],
       ['Dữ liệu chúng tôi lưu', [[
         '<strong>Tài khoản quản trị:</strong> email, họ tên, số điện thoại, ngôn ngữ, mật khẩu (chỉ lưu dạng đã băm).',
         '<strong>Dữ liệu của cơ sở:</strong> hồ sơ cơ sở, phòng, bảng giá, lượt ở, đặt phòng, thanh toán ghi nhận, ca quỹ, dọn phòng, bảo trì, kho, chi phí, nhân viên (chỉ là hồ sơ, không có tài khoản).',
@@ -68,7 +75,7 @@ const privacy = {
         `Dữ liệu được giữ trong thời gian cơ sở còn sử dụng dịch vụ. Mã đặt lại mật khẩu hết hạn sau ${Math.round(config.resetCodeSec / 60)} phút.`,
         `Bạn xóa tài khoản ngay trong ứng dụng (Tài khoản &gt; Xóa tài khoản) hoặc tại <a href="${base()}/account/delete">trang xóa tài khoản</a>; việc xóa là xóa thật. Thông tin khách được xóa theo yêu cầu hoặc tự động theo số ngày cơ sở cài đặt.`,
       ]]],
-      ['Quyền của bạn', [`Bạn có quyền xem, sửa, xuất (CSV) và xóa dữ liệu theo quy định pháp luật về bảo vệ dữ liệu cá nhân. Khách lưu trú có thể yêu cầu cơ sở xóa thông tin của mình, hoặc gửi yêu cầu về ${mailLink}.`]],
+      ['Quyền của bạn', [`Bạn có quyền xem, sửa, xuất (CSV) và xóa dữ liệu theo quy định pháp luật về bảo vệ dữ liệu cá nhân. Khách lưu trú có thể yêu cầu cơ sở xóa thông tin của mình, hoặc ${contact.viReq}.`]],
     ],
   },
   en: {
@@ -76,7 +83,7 @@ const privacy = {
     updated: `Last updated: ${UPDATED}`,
     other: '<a href="?lang=vi">Tiếng Việt</a>',
     sections: [
-      ['Who we are', [`StayDesk is a guesthouse management app for owners and managers, developed by <strong>${esc(OWNER)}</strong>, who is responsible for the data. Contact: ${mailLink}.`]],
+      ['Who we are', [`StayDesk is a guesthouse management app for owners and managers, developed by <strong>${esc(OWNER)}</strong>, who is responsible for the data. ${contact.en}`]],
       ['Data we store', [[
         '<strong>Admin account:</strong> email, name, phone, language, password (stored only as a hash).',
         '<strong>Property data:</strong> profile, rooms, rates, stays, bookings, recorded payments, cash shifts, housekeeping, maintenance, stock, expenses, staff (records only, no accounts).',
@@ -99,7 +106,7 @@ const privacy = {
         `Data is kept while the property uses the service. Password reset codes expire after ${Math.round(config.resetCodeSec / 60)} minutes.`,
         `You can delete your account in the app (Account &gt; Delete account) or on the <a href="${base()}/account/delete">account deletion page</a>; deletion is real, not a flag. Guest details are deleted on request or automatically after the number of days the property sets.`,
       ]]],
-      ['Your rights', [`You may view, correct, export (CSV) and delete data as provided by personal-data protection law. Guests can ask the property to delete their details, or write to ${mailLink}.`]],
+      ['Your rights', [`You may view, correct, export (CSV) and delete data as provided by personal-data protection law. Guests can ask the property to delete their details, or ${contact.enReq}.`]],
     ],
   },
 };
