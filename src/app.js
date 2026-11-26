@@ -7,6 +7,16 @@ const { appVersion, httpsOnly, accessLog, notFoundHandler, errorHandler } = requ
 const { currentTz } = require('./services/settings');
 const { DateTime } = require('luxon');
 
+function replacer(key, value) {
+  const raw = this[key];
+  if (raw instanceof Date) return Number.isNaN(raw.getTime()) ? null : DateTime.fromJSDate(raw).setZone(currentTz()).toISO();
+  if (value && typeof value === 'object' && !Array.isArray(value) && Object.prototype.hasOwnProperty.call(value, '_id')) {
+    const { _id, __v, ...rest } = value;
+    return { id: _id, ...rest };
+  }
+  return value;
+}
+
 function createApp() {
   const app = express();
   app.disable('x-powered-by');
@@ -16,15 +26,15 @@ function createApp() {
    * Chuẩn hóa JSON trả về:
    *  - `_id` → `id`
    *  - Date → ISO 8601 kèm múi giờ cơ sở (vd 2026-11-26T14:30:00.000+07:00)
+   * Gán `res.json` riêng cho từng response: Vercel gắn `res.json` của nó lên response trước khi tới Express,
+   * che mất `res.json` (và `json replacer`) của Express → trả `_id` và giờ `Z`.
    */
-  app.set('json replacer', function replacer(key, value) {
-    const raw = this[key];
-    if (raw instanceof Date) return Number.isNaN(raw.getTime()) ? null : DateTime.fromJSDate(raw).setZone(currentTz()).toISO();
-    if (value && typeof value === 'object' && !Array.isArray(value) && Object.prototype.hasOwnProperty.call(value, '_id')) {
-      const { _id, __v, ...rest } = value;
-      return { id: _id, ...rest };
-    }
-    return value;
+  app.use((_req, res, next) => {
+    res.json = function json(body) {
+      if (!this.get('Content-Type')) this.set('Content-Type', 'application/json; charset=utf-8');
+      return this.send(JSON.stringify(body, replacer));
+    };
+    next();
   });
 
   app.use(helmet());
