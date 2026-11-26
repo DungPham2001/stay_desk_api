@@ -1,0 +1,27 @@
+# Production gợi ý: MongoDB replica set 1 node (bật transaction) + API.
+# Đặt reverse proxy (Caddy/nginx) phía trước để có HTTPS, rồi bật TRUST_PROXY=true, REQUIRE_HTTPS=true.
+services:
+  mongo:
+    image: mongo:7
+    command: ["--replSet", "rs0", "--bind_ip_all"]
+    volumes: [mongo-data:/data/db]
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "try{rs.status().ok}catch(e){rs.initiate({_id:'rs0',members:[{_id:0,host:'mongo:27017'}]}).ok}"]
+      interval: 10s
+      retries: 10
+    restart: unless-stopped
+  api:
+    image: node:20-alpine
+    working_dir: /app
+    volumes: [./:/app]
+    command: sh -c "npm ci --omit=dev && npm run db:init && npm start"
+    env_file: .env
+    environment:
+      MONGODB_URI: mongodb://mongo:27017/staydesk?replicaSet=rs0
+      NODE_ENV: production
+    ports: ["3000:3000"]
+    depends_on:
+      mongo: { condition: service_healthy }
+    restart: unless-stopped
+volumes:
+  mongo-data:

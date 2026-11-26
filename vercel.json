@@ -1,0 +1,5 @@
+{
+  "rewrites": [{ "source": "/(.*)", "destination": "/api" }],
+  "regions": ["sin1"],
+  "crons": [{ "path": "/v1/jobs/run", "schedule": "0 19 * * *" }]
+}
